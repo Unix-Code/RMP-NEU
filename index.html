@@ -49,6 +49,7 @@ app.controller('myCtrl', function($scope, $http, $sce) {
 		url: $scope.url
 	})
 	.then(function(response) {
+	  $scope.ratings = [];
 	  var data = response.data.response.docs;
 	  for (var i = 0; i < data.length; i++) {
 		var element = data[i];
