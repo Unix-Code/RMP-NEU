@@ -24,7 +24,7 @@ li {text-align:left; margin: 5px;}
 	<th>Number of Ratings</th>
 	<th>Comments</th>
 </tr>
-<tr ng-repeat="rating in ratings | orderBy : '-numRatings'">
+<tr ng-repeat="rating in ratings | orderBy : '-numRatings' track by $index">
 	<td><a ng-href="http://www.ratemyprofessors.com/ShowRatings.jsp?tid={{rating.tid}}">{{rating.name}}</a></td>
 	<td>{{rating.avgRating}}</td>
 	<td>{{rating.numRatings}}</td>
@@ -33,7 +33,7 @@ li {text-align:left; margin: 5px;}
 			<div ng-if="!rating.showComments">Click Here to View Comments</div>
 			<div ng-if="rating.showComments">Click Here to Hide Comments</div>
 		</button>
-		<ol ng-if="rating.showComments"><li ng-repeat="comment in rating.comments">{{comment}}</li></ol>
+		<ol ng-if="rating.showComments"><li ng-repeat="comment in rating.comments track by $index">{{comment}}</li></ol>
 	</td>
 </tr>
 </table>
