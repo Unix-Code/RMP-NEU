@@ -1,97 +1,113 @@
 <html>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+
 <head>
-<style>
-table {text-align:center;}
-li {text-align:left; margin: 5px;}
-</style>
+	<style>
+		table {
+			text-align: center;
+		}
+
+		li {
+			text-align: left;
+			margin: 5px;
+		}
+	</style>
 </head>
+
 <body>
+	<div ng-app="myApp" ng-controller="myCtrl">
+		<h1>Rate My Professor - Northeastern</h1>
 
-<div ng-app="myApp" ng-controller="myCtrl"> 
-<h1>Rate My Professor - Northeastern</h1>
+		<div style="display:inline-block">Name:</div>
+		<input type="text" ng-change="updateSearch()" ng-model="searchText" />
 
-<div style="display:inline-block">Name:</div>
-<input type="text" ng-change="updateSearch()" ng-model="searchText" />
+		<p>Result:</p>
+		<div ng-if="!ratings.length > 0">Nothing Found</div>
 
-<p>Result:</p>
-<div ng-if="!ratings.length > 0">Nothing Found</div>
-
-<table ng-if="ratings.length > 0" border="1">
-<tr>
-	<th>Teacher</th>
-	<th>Average Rating</th>
-	<th>Number of Ratings</th>
-	<th>Comments</th>
-</tr>
-<tr ng-repeat="rating in ratings | orderBy : '-numRatings' track by $index">
-	<td><a ng-href="http://www.ratemyprofessors.com/ShowRatings.jsp?tid={{rating.tid}}">{{rating.name}}</a></td>
-	<td>{{rating.avgRating}}</td>
-	<td>{{rating.numRatings}}</td>
-	<td>
-		<button ng-click="toggleComments(rating)">
+		<table ng-if="ratings.length > 0" border="1">
+			<tr>
+				<th>Teacher</th>
+				<th>Average Rating</th>
+				<th>Number of Ratings</th>
+				<th>Comments</th>
+			</tr>
+			<tr ng-repeat="rating in ratings | orderBy : '-numRatings' track by $index">
+				<td><a ng-href="http://www.ratemyprofessors.com/ShowRatings.jsp?tid={{rating.tid}}">{{rating.name}}</a></td>
+				<td>{{rating.avgRating}}</td>
+				<td>{{rating.numRatings}}</td>
+				<td>
+					<button ng-click="toggleComments(rating)">
 			<div ng-if="!rating.showComments">Click Here to View Comments</div>
 			<div ng-if="rating.showComments">Click Here to Hide Comments</div>
 		</button>
-		<ol ng-if="rating.showComments"><li ng-repeat="comment in rating.comments track by $index">{{comment}}</li></ol>
-	</td>
-</tr>
-</table>
-</div>
+					<ol ng-if="rating.showComments">
+						<li ng-repeat="comment in rating.comments track by $index">{{comment}}</li>
+					</ol>
+				</td>
+			</tr>
+		</table>
+	</div>
 
-<script>
-var app = angular.module('myApp', []);
-app.controller('myCtrl', function($scope, $http, $sce) {
-  $scope.searchText = "";
-  $scope.ratings = [];
-  var scrapeComments = function(profID) {
-	var comments = [];
-	$http.get("http://www.ratemyprofessors.com/ShowRatings.jsp?tid=" + profID).then(function(response) {
-		var parser = new DOMParser();
-		var a = parser.parseFromString(response.data, 'text/html');
-		var commentElements = a.documentElement.querySelectorAll('p.commentsParagraph');
-		for (var i = 0; i < commentElements.length; i++) {
-			comments.push(commentElements[i].innerText);
-		}
-	});
-	
-	return comments;
-  };
-  
-  $scope.toggleComments = function(rating) { rating.showComments = !rating.showComments; };
-  
-  $scope.updateSearch = function() {
-	$scope.ratings = [];
-	if (!$scope.searchText) return;
-	$scope.url = $sce.getTrustedResourceUrl('http://search.mtvnservices.com/typeahead/suggest/?solrformat=true&rows=20&q=' 
-					+ $scope.searchText 
-					+ '+AND+schoolid_s%3A696&defType=edismax&qf=teacherfirstname_t%5E2000+teacherlastname_t%5E2000+teacherfullname_t%5E2000+autosuggest&bf=pow(total_number_of_ratings_i%2C2.1)&sort=total_number_of_ratings_i+desc&siteName=rmp&rows=20&start=0&fl=pk_id+teacherfirstname_t+teacherlastname_t+total_number_of_ratings_i+averageratingscore_rf+schoolid_s&fq=&prefix=schoolname_t%3A%22Northeastern+University%22');
-	$http({
-		method: 'JSONP',
-		url: $scope.url
-	})
-	.then(function(response) {
-	  $scope.ratings = [];
-	  var data = response.data.response.docs;
-	  for (var i = 0; i < data.length; i++) {
-		var element = data[i];
-		$scope.ratings.push({
-			tid : element.pk_id,
-			name : element.teacherfirstname_t + " " + element.teacherlastname_t,
-			avgRating : element.averageratingscore_rf,
-			numRatings : element.total_number_of_ratings_i,
-			comments : scrapeComments(element.pk_id),
-			showComments : false});
-	}}, function(error) { console.log(error); });  
-  };
-})
-.config(function ($sceDelegateProvider) {
-  $sceDelegateProvider.resourceUrlWhitelist([
-    'self',
-    '*://search.mtvnservices.com/**'
-  ]);
-});
-</script>
+	<script>
+		var app = angular.module('myApp', []);
+		app.controller('myCtrl', function($scope, $http, $sce) {
+				$scope.searchText = "";
+				$scope.ratings = [];
+				var scrapeComments = function(profID) {
+					var comments = [];
+					$http.get("http://www.ratemyprofessors.com/ShowRatings.jsp?tid=" + profID).then(function(response) {
+						var parser = new DOMParser();
+						var a = parser.parseFromString(response.data, 'text/html');
+						var commentElements = a.documentElement.querySelectorAll('p.commentsParagraph');
+						for (var i = 0; i < commentElements.length; i++) {
+							comments.push(commentElements[i].innerText);
+						}
+					});
 
+					return comments;
+				};
+
+				$scope.toggleComments = function(rating) {
+					rating.showComments = !rating.showComments;
+				};
+
+				$scope.updateSearch = function() {
+					$scope.ratings = [];
+					if (!$scope.searchText) return;
+					$scope.url = $sce.getTrustedResourceUrl('http://search.mtvnservices.com/typeahead/suggest/?solrformat=true&rows=20&q=' +
+						$scope.searchText +
+						'+AND+schoolid_s%3A696&defType=edismax&qf=teacherfirstname_t%5E2000+teacherlastname_t%5E2000+teacherfullname_t%5E2000+autosuggest&bf=pow(total_number_of_ratings_i%2C2.1)&sort=total_number_of_ratings_i+desc&siteName=rmp&rows=20&start=0&fl=pk_id+teacherfirstname_t+teacherlastname_t+total_number_of_ratings_i+averageratingscore_rf+schoolid_s&fq=&prefix=schoolname_t%3A%22Northeastern+University%22'
+					);
+					$http({
+							method: 'JSONP',
+							url: $scope.url
+						})
+						.then(function(response) {
+							$scope.ratings = [];
+							var data = response.data.response.docs;
+							for (var i = 0; i < data.length; i++) {
+								var element = data[i];
+								$scope.ratings.push({
+									tid: element.pk_id,
+									name: element.teacherfirstname_t + " " + element.teacherlastname_t,
+									avgRating: element.averageratingscore_rf,
+									numRatings: element.total_number_of_ratings_i,
+									comments: scrapeComments(element.pk_id),
+									showComments: false
+								});
+							}
+						}, function(error) {
+							console.log(error);
+						});
+				};
+			})
+			.config(function($sceDelegateProvider) {
+				$sceDelegateProvider.resourceUrlWhitelist([
+					'self',
+					'*://search.mtvnservices.com/**'
+				]);
+			});
+	</script>
 </body>
+
 </html>
