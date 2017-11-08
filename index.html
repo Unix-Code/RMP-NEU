@@ -36,7 +36,7 @@
 				<td>{{rating.avgRating}}</td>
 				<td>{{rating.numRatings}}</td>
 				<td>
-					<button ng-click="toggleComments(rating)">
+					<button ng-click="toggleComments(rating)" ng-if="rating.comments.length > 0">
 						<div ng-if="!rating.showComments">Click Here to View Comments</div>
 						<div ng-if="rating.showComments">Click Here to Hide Comments</div>
 					</button>
@@ -55,7 +55,7 @@
 				$scope.ratings = [];
 				var scrapeComments = function(profID) {
 					var comments = [];
-					$http.get("http://www.ratemyprofessors.com/ShowRatings.jsp?tid=" + profID).then(function(response) {
+					$http.get($sce.getTrustedResourceUrl('http://www.ratemyprofessors.com/ShowRatings.jsp?tid=' + profID)).then(function(response) {
 						var parser = new DOMParser();
 						var a = parser.parseFromString(response.data, 'text/html');
 						var commentElements = a.documentElement.querySelectorAll('p.commentsParagraph');
@@ -104,7 +104,8 @@
 			.config(function($sceDelegateProvider) {
 				$sceDelegateProvider.resourceUrlWhitelist([
 					'self',
-					'*://search.mtvnservices.com/**'
+					'*://search.mtvnservices.com/**',
+					'*://www.ratemyprofessors.com/**'
 				]);
 			});
 	</script>
