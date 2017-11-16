@@ -37,8 +37,8 @@
 				<td>{{rating.numRatings}}</td>
 				<td>
 					<button ng-click="toggleComments(rating)" ng-if="rating.comments.length > 0">
-						<div ng-if="!rating.showComments">Click Here to View Comments</div>
-						<div ng-if="rating.showComments">Click Here to Hide Comments</div>
+						<div ng-if="!rating.showComments">View Comments</div>
+						<div ng-if="rating.showComments">Hide Comments</div>
 					</button>
 					<ol ng-if="rating.showComments">
 						<li ng-repeat="comment in rating.comments track by $index">{{comment}}</li>
